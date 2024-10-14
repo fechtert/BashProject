@@ -67,20 +67,33 @@ if [[ $argcount != 1 ]]; then
 	exit 1
 fi
 
-
-
 echo "$input_dir"
 echo "$photo"
 echo "$video"
 echo "$all"
 echo "$argcount"
 
-#backup_dir="${input_dir}_bak"
-#mkdir $backup_dir
+backup_dir="${input_dir}_bak"
+mkdir $backup_dir
 
-#if [[ $all = "yes" ]]; then
-#	cp -r $input_dir/. $backup_dir
-#	tar -czf $backup_dir.tar.gz $backup_dir
-#	rm -rf $backup_dir
-#	echo "Backup $backup_dir.tar.gz of directory $input_dir created and compressed successfully."
-#fi
+if [[ $all = "yes" ]]; then
+	cp -r $input_dir/. $backup_dir
+	echo "All files in $input_dir have been added to the backup."
+fi
+
+
+if [[ $photo = "yes" ]]; then
+
+	echo "All photos in $input_dir have been added to the backup."
+fi
+
+
+if [[ $video = "yes" ]]; then 
+
+	echo "All videos in $input_dir have been added to the backup."
+fi
+
+tar -czf $backup_dir.tar.gz $backup_dir
+rm -rf $backup_dir
+echo "Backup $backup_dir.tar.gz of directory $input_dir created and compressed successfully."
+
