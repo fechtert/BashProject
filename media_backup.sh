@@ -1,7 +1,12 @@
 function display_usage() {
-	echo "Usage - testing"
-	echo "line 2"
-}
+	echo "Usage: $0 -d <input_directory> <mode: -p -v or -a>"
+	echo "Options:"
+	echo "	-d <input_directory>: specify the input directory where files to be backed up are found."
+	echo "	-p: photo mode - will only back up .png .jpg and .jpeg files in the input directory."
+	echo "	-v: video mode - will only back up .mp4 and .mov files in the input directory."
+	echo "	-a: all mode - will back up all files in the input directory."
+	echo "	-h: displays this help information."
+}	
 
 if [ $# -lt 1 ]; then
 	display_usage
@@ -13,8 +18,9 @@ photo=""
 video=""
 all=""
 argcount="0"
+file_regex=""
 
-while getopts ":d:pvauh" opt; do
+while getopts ":d:pvah" opt; do
 	case $opt in
 		d)
 			input_dir=${OPTARG%/}
@@ -32,7 +38,6 @@ while getopts ":d:pvauh" opt; do
 			let "argcount++"
 			;;
 		h)
-			echo "help option"
 			display_usage
 			exit 0
 			;;
@@ -67,33 +72,41 @@ if [[ $argcount != 1 ]]; then
 	exit 1
 fi
 
-echo "$input_dir"
-echo "$photo"
-echo "$video"
-echo "$all"
-echo "$argcount"
-
-backup_dir="${input_dir}_bak"
-mkdir $backup_dir
 
 if [[ $all = "yes" ]]; then
+	backup_dir="${input_dir}_bak"
+	mkdir $backup_dir
 	cp -r $input_dir/. $backup_dir
 	echo "All files in $input_dir have been added to the backup."
 fi
 
 
 if [[ $photo = "yes" ]]; then
-
+	backup_dir="${input_dir}_photos"
+	mkdir $backup_dir
+	file_regex=".+\.png|.+\.jpg|.+\.jpeg"
+	for file in "$input_dir"/*; do
+		if [[ -f "$file" && "$file" =~ $file_regex ]]; then
+			cp "$file" $backup_dir
+		fi
+	done
 	echo "All photos in $input_dir have been added to the backup."
 fi
 
 
 if [[ $video = "yes" ]]; then 
-
+	backup_dir="${input_dir}_videos"
+	mkdir $backup_dir
+	file_regex=".+\.mp4|.+\.mov"
+	for file in "$input_dir"/*; do
+		if [[ -f "$file" && "$file" =~ $file_regex ]]; then
+			cp "$file" $backup_dir
+		fi
+	done
 	echo "All videos in $input_dir have been added to the backup."
 fi
 
 tar -czf $backup_dir.tar.gz $backup_dir
-rm -rf $backup_dir
+#rm -rf $backup_dir
 echo "Backup $backup_dir.tar.gz of directory $input_dir created and compressed successfully."
 
