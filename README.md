@@ -10,5 +10,10 @@ This repository comes with an example directory, including several photos from m
 This script allows me to backup and compress these so that they take up less storage space than they would otherwise.
 
 How to use the script:
-
-
+Usage: ./media_backup.sh -d <input_directory> <mode: -p -v or -a>
+Options:
+	-d <input_directory>: specify the input directory where files to be backed up are found.
+	-p: photo mode - will only back up .png .jpg and .jpeg files in the input directory.
+	-v: video mode - will only back up .mp4 and .mov files in the input directory.
+	-a: all mode - will back up all files in the input directory.
+	-h: displays this help information.
