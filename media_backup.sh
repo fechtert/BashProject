@@ -107,6 +107,9 @@ if [[ $video = "yes" ]]; then
 fi
 
 tar -czf $backup_dir.tar.gz $backup_dir
-#rm -rf $backup_dir
-echo "Backup $backup_dir.tar.gz of directory $input_dir created and compressed successfully."
-
+rm -rf $backup_dir
+if [[ -f "$backup_dir.tar.gz" ]]; then
+	echo "Backup $backup_dir.tar.gz created and compressed successfully."
+else
+	echo "Error: unable to create backup"
+fi
