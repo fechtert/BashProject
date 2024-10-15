@@ -19,6 +19,7 @@ video=""
 all=""
 argcount="0"
 file_regex=""
+file_count="0"
 
 while getopts ":d:pvah" opt; do
 	case $opt in
@@ -26,15 +27,15 @@ while getopts ":d:pvah" opt; do
 			input_dir=${OPTARG%/}
 			;;
 		p)
-			photo="yes"
+			photo="photo"
 			let "argcount++"
 			;;
 		v)
-			video="yes"
+			video="video"
 			let "argcount++"
 			;;
 		a)
-			all="yes"
+			all="all"
 			let "argcount++"
 			;;
 		h)
@@ -73,43 +74,54 @@ if [[ $argcount != 1 ]]; then
 fi
 
 
-if [[ $all = "yes" ]]; then
+if [[ $all = "all" ]]; then
 	backup_dir="${input_dir}_bak"
 	mkdir $backup_dir
-	cp -r $input_dir/. $backup_dir
-	echo "All files in $input_dir have been added to the backup."
+	for file in "$input_dir"/*; do
+		cp "$file" $backup_dir
+		let "file_count++"
+	done
+	mode="$all"
 fi
 
 
-if [[ $photo = "yes" ]]; then
+if [[ $photo = "photo" ]]; then
 	backup_dir="${input_dir}_photos"
 	mkdir $backup_dir
 	file_regex=".+\.png|.+\.jpg|.+\.jpeg"
 	for file in "$input_dir"/*; do
 		if [[ -f "$file" && "$file" =~ $file_regex ]]; then
 			cp "$file" $backup_dir
+			let "file_count++"
 		fi
 	done
-	echo "All photos in $input_dir have been added to the backup."
+	mode="$photo"
 fi
 
 
-if [[ $video = "yes" ]]; then 
+if [[ $video = "video" ]]; then 
 	backup_dir="${input_dir}_videos"
 	mkdir $backup_dir
 	file_regex=".+\.mp4|.+\.mov"
 	for file in "$input_dir"/*; do
 		if [[ -f "$file" && "$file" =~ $file_regex ]]; then
 			cp "$file" $backup_dir
+			let "file_count++"
 		fi
 	done
-	echo "All videos in $input_dir have been added to the backup."
+	mode="$video"
 fi
 
-tar -czf $backup_dir.tar.gz $backup_dir
-rm -rf $backup_dir
-if [[ -f "$backup_dir.tar.gz" ]]; then
-	echo "Backup $backup_dir.tar.gz created and compressed successfully."
+if [[ $file_count = "0" ]]; then
+	echo "Error: no files able to be backed up using option $3"
+	rm -rf $backup_dir
+	exit 1
 else
-	echo "Error: unable to create backup"
+	tar -czf $backup_dir.tar.gz $backup_dir
+	rm -rf $backup_dir
+	if [[ -f "$backup_dir.tar.gz" ]]; then
+		echo "Backup $backup_dir.tar.gz created and compressed successfully using $mode mode."
+	else
+		echo "Error: unable to create backup"
+	fi
 fi
